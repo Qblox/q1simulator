@@ -15,15 +15,11 @@ spec:
       default: ""
       description: "Extra pytest arguments to choose what runs. Use a keyword like `-k loopback`, or one or more paths from the repo root separated by spaces, e.g. `tests/test_loopback_demo.py tests/test_nco_control.py`. Empty runs the whole suite."
 ---
-#-- Configuration -------------------------------------------------------------
-# Pipeline stages
 stages:
   - Flash
   - Static Analysis
   - Executing
-# Pipeline variables
 
-# These are variables which are defined for the pipeline only.
 variables:
   QT_DEBUG_PLUGINS: 0 # change to `1` when facing issues with Qt
   QT_QPA_PLATFORM: offscreen # disable PlotMon from actually plotting
@@ -31,15 +27,20 @@ variables:
   GIT_CLEAN_FLAGS: -ffdx
   GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID
   TOKENIZERS_PARALLELISM: false # Workaround for failures in parallel execution, see DEVOPS-1056
-  # Derived from the pipeline inputs above. `TARGET` selects which test job runs
-  # (dummy vs hardware); `PYTEST_ARGS` is forwarded to pytest to select files.
   TARGET: "$[[ inputs.target ]]"
   PYTEST_ARGS: "$[[ inputs.pytest_args ]]"
 include:
   - '/.gitlab-ci/runners.yaml'
-  - '/.gitlab-ci/lint.yaml'
-# In GitLab CI/CD, workflow is a special keyword that allows you
-# to define a set of rules that apply to the entire pipeline.
+
+  # - local: '/.gitlab-ci/report-github.yaml'
+  #   inputs:
+  #     project: Qblox/q1simulator
+  #     token: ${QBLOX_GITHUB_TOKEN}
+  #     pr_number
+
+      
+
+
 workflow:
   auto_cancel:
     on_new_commit: interruptible
@@ -50,7 +51,11 @@ workflow:
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
     - if: $CI_COMMIT_BRANCH
-#-- Executing stage -------------------------------------------------------------
+
+debug:
+  stage: .pre
+  script:
+    - env
 
 flash cluster:
   stage: Flash
@@ -104,3 +109,7 @@ test on hardware:
     - when: manual
       allow_failure: true
   timeout: 60m
+
+# ---
+
+
