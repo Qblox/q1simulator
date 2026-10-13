@@ -1,0 +1,27 @@
+spec:
+  inputs:
+    project:
+      type: string
+      description: GitHub project (owner/repo) to report test results to.
+    token:
+      type: string
+      description: GitHub PAT to comment on behalf of.
+    needs:
+      type: array
+      description: 'Jobs to wait for before reporting, e.g. ["test on dummy"] or [{job: "test on hardware", optional: true}].'
+    stage:
+      type: string
+      description: Stage to include report job in.
+      default: .post
+---
+
+report:github:
+  image: registry.gitlab.com/qblox/containers/glab:latest
+  stage: $[[ inputs.stage ]]
+  needs: $[[ inputs.needs ]]
+  when: always
+  variables:
+    TOKEN: "$[[ inputs.token ]]"
+    REPO: "$[[ inputs.project ]]"
+  script:
+    - python3 .gitlab-ci/scripts/gh_comment.py

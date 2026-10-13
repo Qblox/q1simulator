@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: © 2026 Qblox <https://qblox.com>
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# Pipeline inputs. These render as a form on the GitLab "Run pipeline" page, so
+# you can start a pipeline from the web UI and pick where it runs and what runs.
+spec:
+  inputs:
+    target:
+      default: dummy
+      options:
+        - dummy
+        - hardware
+      description: "Run against the simulated (dummy) cluster or the real hardware."
+    pytest_args:
+      default: ""
+      description: "Extra pytest arguments to choose what runs. Use a keyword like `-k loopback`, or one or more paths from the repo root separated by spaces, e.g. `tests/test_loopback_demo.py tests/test_nco_control.py`. Empty runs the whole suite."
+---
+
+include:
+  - project: qblox/demos/hardware-in-the-loop 
+    file: .gitlab-ci.yml
+    ref: 4596e67aeebe304a0a6adf35a198baa1f328a0f4
+    inputs:
+      target: $[[ inputs.target ]]
+      pytest_args: $[[ inputs.pytest_args ]]
+
+
+  - local: .gitlab-ci/report-github.yml
+    inputs: 
+      project: Qblox/q1simulator
+      token: $QBLOX_GITHUB_PAT
+      stage: .post
+      needs: []
