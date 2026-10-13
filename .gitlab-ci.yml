@@ -15,101 +15,11 @@ spec:
       default: ""
       description: "Extra pytest arguments to choose what runs. Use a keyword like `-k loopback`, or one or more paths from the repo root separated by spaces, e.g. `tests/test_loopback_demo.py tests/test_nco_control.py`. Empty runs the whole suite."
 ---
-stages:
-  - Flash
-  - Static Analysis
-  - Executing
 
-variables:
-  QT_DEBUG_PLUGINS: 0 # change to `1` when facing issues with Qt
-  QT_QPA_PLATFORM: offscreen # disable PlotMon from actually plotting
-  FORCE_COLOR: True
-  GIT_CLEAN_FLAGS: -ffdx
-  GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID
-  TOKENIZERS_PARALLELISM: false # Workaround for failures in parallel execution, see DEVOPS-1056
-  TARGET: "$[[ inputs.target ]]"
-  PYTEST_ARGS: "$[[ inputs.pytest_args ]]"
 include:
-  - '/.gitlab-ci/runners.yaml'
-
-  # - local: '/.gitlab-ci/report-github.yaml'
-  #   inputs:
-  #     project: Qblox/q1simulator
-  #     token: ${QBLOX_GITHUB_TOKEN}
-  #     pr_number
-
-      
-
-
-workflow:
-  auto_cancel:
-    on_new_commit: interruptible
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "web"
-    - if: $CI_COMMIT_REF_PROTECTED == "true"
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
-      when: never
-    - if: $CI_COMMIT_BRANCH
-
-debug:
-  stage: .pre
-  script:
-    - env
-
-flash cluster:
-  stage: Flash
-  needs: []
-  extends:
-    - .runner_hardware
-  script:
-    # The number can be a release, or gitlab tag (rc) or git ref (git hash)
-    - bash src/qblox_hilaas/flash_cluster.sh $FIRMWARE_VER
-  manual_confirmation: "Flash firmware?"
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-      when: always
-      allow_failure: false
-    - when: manual
-      allow_failure: true
-  artifacts:
-    paths:
-      - cluster_mm_release.tar.gz
-    expire_in: 1 week
-    when: on_failure
-#-- Executing stage -------------------------------------------------------------
-
-test on dummy:
-  stage: Executing
-  needs: []
-  extends:
-    - .runner_dummy
-  script:
-    - pytest ${PYTEST_ARGS}
-  rules:
-    - if: $TARGET == "dummy"
-test on hardware:
-  stage: Executing
-  needs: []
-  extends:
-    - .runner_hardware
-  script:
-    - pytest ${PYTEST_ARGS}
-  rules:
-    # Nightly / scheduled runs always exercise the hardware.
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-      when: always
-      allow_failure: false
-    # Selected explicitly from the "Run pipeline" inputs -> run automatically.
-    - if: $TARGET == "hardware"
-    # Otherwise keep it as a manual button in every pipeline (e.g. from an MR).
-    - if: $CI_COMMIT_REF_PROTECTED == "true"
-      when: manual
-      allow_failure: false
-    - when: manual
-      allow_failure: true
-  timeout: 60m
-
-# ---
-
-
+  - project: qblox/demos/hardware-in-the-loop 
+    file: .gitlab-ci.yml
+    ref: 4596e67aeebe304a0a6adf35a198baa1f328a0f4
+    inputs:
+      target: $[[ inputs.target ]]
+      pytest_args: $[[ inputs.pytest_args ]]
