@@ -23,3 +23,11 @@ include:
     inputs:
       target: $[[ inputs.target ]]
       pytest_args: $[[ inputs.pytest_args ]]
+
+
+  - local: .gitlab-ci/report-github.yml
+    inputs: 
+      project: Qblox/q1simulator
+      token: $QBLOX_GITHUB_PAT
+      stage: .post
+      needs: []

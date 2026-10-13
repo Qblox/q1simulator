@@ -6,25 +6,22 @@ spec:
     token:
       type: string
       description: GitHub PAT to comment on behalf of.
-    pr_number:
-      type: string
-      description: GitHub pull request number to comment on.
     needs:
       type: array
       description: 'Jobs to wait for before reporting, e.g. ["test on dummy"] or [{job: "test on hardware", optional: true}].'
-    artifacts_url:
+    stage:
       type: string
-      description: Link to download artifacts from GitLab.
+      description: Stage to include report job in.
+      default: .post
 ---
 
 report:github:
-  stage: .post
   image: registry.gitlab.com/qblox/containers/glab:latest
+  stage: $[[ inputs.stage ]]
   needs: $[[ inputs.needs ]]
   when: always
   variables:
     TOKEN: "$[[ inputs.token ]]"
-    PR_NUMBER: "$[[ inputs.pr_number ]]"
     REPO: "$[[ inputs.project ]]"
   script:
-    - bash .gitlab-ci/scripts/gh-comment.sh
+    - python3 .gitlab-ci/scripts/gh_comment.py
