@@ -19,7 +19,7 @@ stages:
   - q1simulator
 
 include:
-  - component: $CI_SERVER_FQDN/qblox/infrastructure/ci-components/q1simulator-ci@1.1.0-rc1
+  - component: $CI_SERVER_FQDN/qblox/infrastructure/ci-components/q1simulator-ci@feat/DEVOPS-1467-github-report
     inputs:
       target: $[[ inputs.target ]]
       pytest_args: $[[ inputs.pytest_args ]]
