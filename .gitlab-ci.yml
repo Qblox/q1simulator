@@ -1,8 +1,7 @@
 # SPDX-FileCopyrightText: © 2026 Qblox <https://qblox.com>
 # SPDX-License-Identifier: BSD-3-Clause
 #
-# Pipeline inputs. These render as a form on the GitLab "Run pipeline" page, so
-# you can start a pipeline from the web UI and pick where it runs and what runs.
+
 spec:
   inputs:
     target:
@@ -17,17 +16,31 @@ spec:
 ---
 
 include:
-  - project: qblox/demos/hardware-in-the-loop 
-    file: .gitlab-ci.yml
-    ref: 4596e67aeebe304a0a6adf35a198baa1f328a0f4
+  - component: $CI_SERVER_FQDN/qblox/infrastructure/ci-components/q1simulator-ci@1.1.0-rc1
     inputs:
       target: $[[ inputs.target ]]
       pytest_args: $[[ inputs.pytest_args ]]
 
+      # Project and branch to find MR associated with
+      # the pipeline that triggered this.
+      project: qblox/q1simulator
+      branch: ${CI_COMMIT_REF_NAME}
 
-  - local: .gitlab-ci/report-github.yml
-    inputs: 
-      project: Qblox/q1simulator
-      token: $QBLOX_GITHUB_PAT
-      stage: .post
-      needs: []
+      # Token used for commenting on GitHub
+      token: ${GITHUB_REPORT_PAT}
+
+      # Folder with test artifacts results
+      # that will be commented back on the callers' MR.
+      artifacts_directory: results/
+      bucket_name: hil-artifacts
+
+      # Same as version in component.
+      gitlab_ref: 1.1.0-rc1
+
+      # Google cloud authentication
+      gcp_service_account_email: ${GCP_SERVICE_ACCOUNT_EMAIL}
+      gcp_workload_identity_provider: ${GCP_WORKLOAD_IDENTITY_PROVIDER_URL}
+
+      # Gitlab
+      job_name: q1simulator
+      stage: q1simulator
