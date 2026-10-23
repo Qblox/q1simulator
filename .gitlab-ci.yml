@@ -39,6 +39,7 @@ include:
 
       # Same as version in component.
       gitlab_ref: feat/DEVOPS-1467-github-report
+      gitlab_token: ${GITLAB_READ_SCRIPTS_TOKEN}
 
       # Google cloud authentication
       gcp_service_account_email: ${GCP_SERVICE_ACCOUNT_EMAIL}
