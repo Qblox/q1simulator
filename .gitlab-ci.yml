@@ -38,7 +38,7 @@ include:
       bucket_name: hil-artifacts
 
       # Same as version in component.
-      gitlab_ref: 1.1.0-rc1
+      gitlab_ref: feat/DEVOPS-1467-github-report
 
       # Google cloud authentication
       gcp_service_account_email: ${GCP_SERVICE_ACCOUNT_EMAIL}
