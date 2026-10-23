@@ -15,6 +15,9 @@ spec:
       description: "Extra pytest arguments to choose what runs. Use a keyword like `-k loopback`, or one or more paths from the repo root separated by spaces, e.g. `tests/test_loopback_demo.py tests/test_nco_control.py`. Empty runs the whole suite."
 ---
 
+stages:
+  - q1simulator
+
 include:
   - component: $CI_SERVER_FQDN/qblox/infrastructure/ci-components/q1simulator-ci@1.1.0-rc1
     inputs:
@@ -27,7 +30,7 @@ include:
       branch: ${CI_COMMIT_REF_NAME}
 
       # Token used for commenting on GitHub
-      token: ${GITHUB_REPORT_PAT}
+      token: ${QBLOX_GITHUB_PAT}
 
       # Folder with test artifacts results
       # that will be commented back on the callers' MR.
