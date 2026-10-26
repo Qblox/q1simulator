@@ -15,6 +15,12 @@ spec:
       description: "Extra pytest arguments to choose what runs. Use a keyword like `-k loopback`, or one or more paths from the repo root separated by spaces, e.g. `tests/test_loopback_demo.py tests/test_nco_control.py`. Empty runs the whole suite."
 ---
 
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+
 stages:
   - q1simulator
 
